@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "338110400267",
+    "project_id": "iosfaceid",
+    "storage_bucket": "iosfaceid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338110400267:android:6316464aae6da4d418040e",
+        "android_client_info": {
+          "package_name": "com.maclean.levin.iosFaceId"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "338110400267-gklnb04mf7ov50cs78dorpb4jg1gbdt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7z0nOF_xdSZD3XvJpKmatLNz3ie4qrwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "338110400267-gklnb04mf7ov50cs78dorpb4jg1gbdt1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "338110400267-vvaaoapdgoi1egpp5q8m149okil0h66l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.maclean.levin.iosFaceId"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
