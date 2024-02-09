@@ -2,7 +2,6 @@ import {StyleSheet} from "react-native";
 import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 
-import LogInScreen from "./screens/LogInScreen";
 import SignInPage from "./screens/SignInPage";
 import SignUpPage from "./screens/SignUpPage";
 import PhoneNumberVerification from "./screens/PhoneNumberVerification";

@@ -13,9 +13,6 @@ export async function save(key: string, value: object) {
   }
 }
 
-// const userData = {user: "maclean.levin@gmail.com", password: "johnwayne2004"};
-// save("bananas", userData);
-
 export async function getValueFor(key: string): Promise<{user: string; password: string} | {opt_into_face_auth: string} | null> {
   let result = await SecureStore.getItemAsync(key);
 
@@ -28,5 +25,33 @@ export async function getValueFor(key: string): Promise<{user: string; password:
     return parsedObject;
   } else {
     return null;
+  }
+}
+
+export async function handleAlert(decision: String, email: String, password: String) {
+  try {
+    if (decision == "YES") {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate with Face ID",
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) {
+        const opt_into_face_auth = {answer: "YES"};
+
+        save("opt_into_face_auth", opt_into_face_auth);
+
+        save("UserKey", {user: email, password: password});
+      } else {
+        Alert.alert("Face ID Authentication", "Authentication failed");
+      }
+    } else {
+      // Saving as no before show OS system prompt will allow them to enable this in the future easily.
+      const opt_into_face_auth = {answer: "NO"};
+      save("opt_into_face_auth", opt_into_face_auth);
+    }
+  } catch (error) {
+    Alert.alert("Face ID Authentication", "Authentication failed");
+    console.log(error);
   }
 }

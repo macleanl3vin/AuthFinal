@@ -21,13 +21,6 @@ export default function SignInPage() {
   // emailRegex checks if the input string resembles a valid email address pattern.
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // let result:
-  //   | {
-  //       user: string;
-  //       password: string;
-  //     }
-  //   | undefined;
-
   const authenticateWithFaceID = async () => {
     try {
       const result = await LocalAuthentication.authenticateAsync({

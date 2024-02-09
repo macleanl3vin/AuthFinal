@@ -6,7 +6,7 @@ import {FirebaseError} from "firebase/app";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 
-import {getValueFor, save} from "../helperFunctions/StorageFunctions";
+import {getValueFor, save, handleAlert} from "../helperFunctions/StorageFunctions";
 import {useRoute} from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
 
@@ -22,38 +22,14 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
 
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
 
-  const handleAlert = async (decision: String) => {
-    try {
-      if (decision == "YES") {
-        const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Authenticate with Face ID",
-          disableDeviceFallback: false,
-        });
-
-        const opt_into_face_auth = {answer: "YES"};
-
-        save("opt_into_face_auth", opt_into_face_auth);
-
-        save("UserKey", {user: email, password: password});
-      } else {
-        // Saving as no before show OS system prompt will allow them to enable this in the future easily.
-        const opt_into_face_auth = {answer: "NO"};
-        save("opt_into_face_auth", opt_into_face_auth);
-        console.log("NO");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const SignIn = async () => {
     try {
       let returnValue = await getValueFor("opt_into_face_auth");
 
       if (returnValue == null) {
         Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO")},
-          {text: "YES", onPress: () => handleAlert("YES")},
+          {text: "NO", onPress: () => handleAlert("NO", email, password)},
+          {text: "YES", onPress: () => handleAlert("YES", email, password)},
         ]);
         navigation.navigate("Dashboard", {currentEmail: email});
       } else if ("answer" in returnValue && (returnValue.answer === "NO" || returnValue.answer === "YES")) {
@@ -101,38 +77,6 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
       setLoading(false);
     }
   };
-
-  // const SignIn = async () => {
-  //   setLoading(true);
-
-  //   try {
-  //     const userCredential = await auth().signInWithEmailAndPassword(email, password);
-  //     const user = userCredential.user;
-
-  //     // If email is verified, proceed to the Dashboard
-  //     if (user && user.emailVerified) {
-  //       await user.reload();
-
-  //       navigation.navigate("Dashboard", {currentEmail: user.email});
-  //     } else {
-  //       // If email is not verified, show an alert
-  //       Alert.alert("Email not verified", "Please verify your email before proceeding.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error signing in:", error);
-
-  //     // Check for specific error codes
-  //     const firebaseError = error as FirebaseError;
-
-  //     if (firebaseError.code == "auth/wrong-password") {
-  //       Alert.alert("Invalid Password", "Please check your password and try again.");
-  //     } else if (firebaseError.code == "auth/user-not-found") {
-  //       Alert.alert("User Error", "Email may not be verified, check email.");
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <View style={styles.container}>

@@ -40,9 +40,9 @@ end
 target 'iosFaceId' do
   use_expo_modules!
   config = use_native_modules!
-  
+
   use_frameworks! :linkage => :static 
-  $RNFirebaseAsStaticFramework = true 
+  $RNFirebaseAsStaticFramework = true
 
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']

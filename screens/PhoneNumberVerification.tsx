@@ -11,7 +11,7 @@ import {initiatePhoneNumberVerification, linkPhoneNumberToAccount} from "../help
 import {collection, doc, getFirestore, setDoc} from "firebase/firestore";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
-import {getValueFor, save} from "../helperFunctions/StorageFunctions";
+import {getValueFor, save, handleAlert} from "../helperFunctions/StorageFunctions";
 
 interface PageThreeProps {
   route: any;
@@ -33,34 +33,14 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
     setConfirmation(phoneVerificationConfirmation);
   };
 
-  const handleAlert = async (decision: String) => {
-    if (decision == "YES") {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Authenticate with Face ID",
-        disableDeviceFallback: false,
-      });
-      if (result.success) {
-        const opt_into_face_auth = {answer: "YES"};
-
-        save("opt_into_face_auth", opt_into_face_auth);
-
-        save("UserKey", {user: email, password: password});
-      }
-    } else {
-      // Saving as no before show OS system prompt will allow them to enable this in the future easily.
-      const opt_into_face_auth = {answer: "NO"};
-      save("opt_into_face_auth", opt_into_face_auth);
-    }
-  };
-
   const allowFaceID = async () => {
     try {
       let returnValue = await getValueFor("opt_into_face_auth");
 
       if (returnValue == null) {
         Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO")},
-          {text: "YES", onPress: () => handleAlert("YES")},
+          {text: "NO", onPress: () => handleAlert("NO", email, password)},
+          {text: "YES", onPress: () => handleAlert("YES", email, password)},
         ]);
       }
     } catch (error) {

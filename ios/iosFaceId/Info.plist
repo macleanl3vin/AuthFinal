@@ -30,12 +30,6 @@
           <string>com.maclean.levin.iosFaceId</string>
         </array>
       </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>com.googleusercontent.apps.338110400267-vvaaoapdgoi1egpp5q8m149okil0h66l</string>
-        </array>
-      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>
