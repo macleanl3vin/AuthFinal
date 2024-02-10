@@ -45,6 +45,12 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
         save("opt_into_face_auth", opt_into_face_auth);
 
         save("UserKey", {user: email, password: password});
+
+        const isFirstTimeOpened = await SecureStore.getItemAsync("firstTimeOpened");
+
+        if (isFirstTimeOpened) {
+          await SecureStore.setItemAsync("firstTimeOpened", "false");
+        }
       }
     } else {
       // Saving as no before show OS system prompt will allow them to enable this in the future easily.

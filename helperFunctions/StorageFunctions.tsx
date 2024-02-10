@@ -13,10 +13,7 @@ export async function save(key: string, value: object) {
   }
 }
 
-// const userData = {user: "maclean.levin@gmail.com", password: "johnwayne2004"};
-// save("bananas", userData);
-
-export async function getValueFor(key: string): Promise<{user: string; password: string} | {opt_into_face_auth: string} | null> {
+export async function getValueFor(key: string): Promise<{user: string; password: string} | {opt_into_face_auth: string} | {change_password: string} | null> {
   let result = await SecureStore.getItemAsync(key);
 
   if (result && key === "UserKey") {
@@ -25,6 +22,9 @@ export async function getValueFor(key: string): Promise<{user: string; password:
     return parsedObject;
   } else if (result && key === "opt_into_face_auth") {
     const parsedObject: {opt_into_face_auth: string} = JSON.parse(result);
+    return parsedObject;
+  } else if (result && key === "change_password") {
+    const parsedObject: {change_password: string} = JSON.parse(result);
     return parsedObject;
   } else {
     return null;

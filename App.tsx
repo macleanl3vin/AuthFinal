@@ -2,14 +2,13 @@ import {StyleSheet} from "react-native";
 import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 
-import LogInScreen from "./screens/LogInScreen";
 import SignInPage from "./screens/SignInPage";
 import SignUpPage from "./screens/SignUpPage";
 import PhoneNumberVerification from "./screens/PhoneNumberVerification";
 import AwaitEmailVerification from "./screens/AwaitEmailVerification";
 import Dashboard from "./screens/Dashboard";
 import EnterPassword from "./screens/EnterPassword";
-
+import SignInWithPhone from "./screens/SignInWithPhone";
 export type EditorParams = {
   SignUpPage: undefined;
   AwaitEmailVerification: {
@@ -45,8 +44,9 @@ export default function App() {
         <Stack.Screen name="SignUpPage" component={SignUpPage} options={{headerShown: false}} />
         <Stack.Screen name="EnterPassword" component={EnterPassword} options={{headerShown: false}} />
         <Stack.Screen name="AwaitEmailVerification" component={AwaitEmailVerification} options={{headerShown: false}} />
-
         <Stack.Screen name="PhoneNumberVerification" component={PhoneNumberVerification} options={{headerShown: false}} />
+
+        <Stack.Screen name="SignInWithPhone" component={SignInWithPhone} options={{headerShown: false}} />
         <Stack.Screen name="SignInPage" component={SignInPage} options={{headerShown: false}} />
         <Stack.Screen name="Dashboard" component={Dashboard} options={{headerShown: false}} />
       </Stack.Navigator>

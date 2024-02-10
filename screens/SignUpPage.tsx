@@ -21,15 +21,6 @@ export default function SignUpPage() {
   const formattedPhoneNumber = phone.replace(/\D/g, "");
   const fullPhoneNumber = `+1${formattedPhoneNumber}`;
 
-  async function save(key: string, value: object) {
-    try {
-      const stringValue = JSON.stringify(value);
-      await SecureStore.setItemAsync(key, stringValue);
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
-  }
-
   const signup = async () => {
     setLoading(true);
 
