@@ -21,7 +21,7 @@
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID"
       },
-      "buildNumber": "2" 
+      "buildNumber": "3" 
     },
     "android": {
       "adaptiveIcon": {
@@ -46,7 +46,16 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "extraPods": [
+              {
+                "name": "GoogleUtilities",
+                "modular_headers": true
+              },
+              {
+                "name": "FirebaseCore",
+                "modular_headers": true
+              }
+            ]
           }
         }
       ]
