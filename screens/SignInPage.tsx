@@ -11,6 +11,7 @@ import {EditorParams} from "../App";
 
 import * as SecureStore from "expo-secure-store";
 import {getValueFor} from "../helperFunctions/StorageFunctions";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SignInPage() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -20,13 +21,7 @@ export default function SignInPage() {
 
   // emailRegex checks if the input string resembles a valid email address pattern.
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  // let result:
-  //   | {
-  //       user: string;
-  //       password: string;
-  //     }
-  //   | undefined;
+  const phoneRegex = /^\d{10}$/;
 
   const authenticateWithFaceID = async () => {
     try {
@@ -48,12 +43,23 @@ export default function SignInPage() {
   };
 
   const handleAuthentication = async () => {
+    let isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
+
+    if (!isFirstTimeOpened) {
+      // Clean up data if it's the first time the app is opened
+      await cleanUpData();
+      await AsyncStorage.setItem("firstTimeOpened", "true");
+    }
+
     let returnValue = await getValueFor("opt_into_face_auth");
 
-    if (returnValue == null) {
+    let changePassword = await getValueFor("change_password");
+
+    if (returnValue == null || returnValue.answer === "NO" || changePassword?.change_password === true) {
       // Initiate manual sign in/sign up flow
       console.log("opt_into_face_auth is", returnValue);
-    } else if ("answer" in returnValue && returnValue.answer === "YES") {
+      console.log("change_password is", changePassword);
+    } else if ("answer" in returnValue && returnValue.answer === "YES" && changePassword?.change_password === false) {
       // Initiate face ID sign in flow
       const userCred = await authenticateWithFaceID();
 
@@ -65,22 +71,35 @@ export default function SignInPage() {
         let signIn = await auth().signInWithEmailAndPassword(user, password);
         if (signIn) {
           navigation.navigate("Dashboard");
+        } else {
+          Alert.alert("Error Signing In", "Credentials incorrect");
         }
       }
     }
   };
+
+  const cleanUpData = async () => {
+    try {
+      await SecureStore.deleteItemAsync("UserKey");
+      await SecureStore.deleteItemAsync("opt_into_face_auth");
+      console.log("Sensitive data deleted.");
+    } catch (error) {
+      console.error("Error checking and deleting stored data:", error);
+    }
+  };
+
   useEffect(() => {
     // function calls when the component is mounted
-    handleAuthentication();
+    const fetchData = async () => {
+      await handleAuthentication();
+    };
+    fetchData();
   }, []);
 
   const SignIn = async () => {
     setLoading(true);
 
     try {
-      const test = await LocalAuthentication.hasHardwareAsync();
-      console.log("does it have fingerprint or face ID", test);
-
       // Check if the input is empty
       const trimmedInput = emailOrPhone.trim();
       if (!trimmedInput) {
@@ -98,8 +117,23 @@ export default function SignInPage() {
         } else {
           alert("Email not registered!");
         }
+      } else if (phoneRegex.test(trimmedInput)) {
+        // replace all non-digit characters with an empty string.
+        const formattedPhoneNumber = trimmedInput.replace(/\D/g, "");
+        const fullPhoneNumber = `+1${formattedPhoneNumber}`;
+
+        // Checking if phone # is registered
+        const isPhoneNumberRegistered = await checkIfPhoneNumberIsRegistered(fullPhoneNumber);
+
+        if (isPhoneNumberRegistered) {
+          const confirmation = await initiatePhoneNumberVerification(fullPhoneNumber);
+
+          navigation.navigate("SignInWithPhone", {confirmationCred: confirmation});
+        } else {
+          alert("Phone number is not registered. Please sign up first.");
+        }
       } else {
-        alert("Enter a valid Email");
+        alert("Please enter a valid email or phone number.");
       }
     } catch (error) {
       setLoading(false);

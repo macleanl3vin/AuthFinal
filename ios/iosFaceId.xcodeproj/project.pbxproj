@@ -15,7 +15,7 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		FFAFF663798931247A8D4415 /* Pods_iosFaceId.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B799219B2D0DAF799D7C057C /* Pods_iosFaceId.framework */; };
+		DE95BCF24A47A163989B327C /* Pods_iosFaceId.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52CAE5C477ECA4B9E2888E19 /* Pods_iosFaceId.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,10 +28,10 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = iosFaceId/main.m; sourceTree = "<group>"; };
 		260DD9D620984C2D91683B66 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "iosFaceId/noop-file.swift"; sourceTree = "<group>"; };
 		35FDB54A576C4E65A9A47305 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "iosFaceId/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		52CAE5C477ECA4B9E2888E19 /* Pods_iosFaceId.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosFaceId.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C2E3173556A471DD304B334 /* Pods-iosFaceId.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosFaceId.debug.xcconfig"; path = "Target Support Files/Pods-iosFaceId/Pods-iosFaceId.debug.xcconfig"; sourceTree = "<group>"; };
 		7A4D352CD337FB3A3BF06240 /* Pods-iosFaceId.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosFaceId.release.xcconfig"; path = "Target Support Files/Pods-iosFaceId/Pods-iosFaceId.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = iosFaceId/SplashScreen.storyboard; sourceTree = "<group>"; };
-		B799219B2D0DAF799D7C057C /* Pods_iosFaceId.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosFaceId.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-iosFaceId/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -42,7 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FFAFF663798931247A8D4415 /* Pods_iosFaceId.framework in Frameworks */,
+				DE95BCF24A47A163989B327C /* Pods_iosFaceId.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				B799219B2D0DAF799D7C057C /* Pods_iosFaceId.framework */,
+				52CAE5C477ECA4B9E2888E19 /* Pods_iosFaceId.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

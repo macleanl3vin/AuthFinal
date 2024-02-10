@@ -1,11 +1,11 @@
-import {View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput} from "react-native";
+import {View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Alert} from "react-native";
 import React, {useState} from "react";
 import auth from "@react-native-firebase/auth";
 import {QuerySnapshot, collection, getDocs, getFirestore, query, updateDoc, where} from "firebase/firestore";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
-
+import * as SecureStore from "expo-secure-store";
 interface DashboardProps {
   route: any;
 }
@@ -50,11 +50,24 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
       if (emailRegex.test(trimmedInput)) {
         auth().currentUser?.verifyBeforeUpdateEmail(trimmedInput);
 
-        alert("Verify your new email");
+        Alert.alert("Verify your new email");
 
         const userCollection = collection(firestore, "users");
         const q = query(userCollection, where("email", "==", currentEmail));
         const querySnapshot: QuerySnapshot = await getDocs(q);
+
+        const userKey = await SecureStore.getItemAsync("UserKey");
+        if (userKey) {
+          // Parse the JSON string to get the object
+          const userData = JSON.parse(userKey);
+
+          // Update the user property with the new email
+          userData.user = newEmail;
+
+          // Convert the object back to a JSON string
+          const updatedUserKey = JSON.stringify(userData);
+          await SecureStore.setItemAsync("UserKey", updatedUserKey);
+        }
 
         if (!querySnapshot.empty) {
           // Assuming there is only one document with the specific email, which there should be.
@@ -83,7 +96,7 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
       ) : (
         <View style={styles.ButtonContainer}>
           <TouchableOpacity onPress={changeEmail} style={styles.signupButton}>
-            <Text>Next</Text>
+            <Text>Change Email</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleLogout} style={styles.logOutButton}>
             <Text>Sign Out</Text>
