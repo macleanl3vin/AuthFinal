@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {StyleSheet, Text, View, TouchableOpacity, KeyboardAvoidingView, TextInput, ActivityIndicator, Alert} from "react-native";
+import {StyleSheet, Text, View, TouchableOpacity, KeyboardAvoidingView, TextInput, ActivityIndicator, Alert, Linking} from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 
 import {useNavigation, useIsFocused} from "@react-navigation/native";
@@ -12,6 +12,7 @@ import {EditorParams} from "../App";
 import * as SecureStore from "expo-secure-store";
 import {getValueFor} from "../helperFunctions/StorageFunctions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
 
 export default function SignInPage() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -22,6 +23,37 @@ export default function SignInPage() {
   // emailRegex checks if the input string resembles a valid email address pattern.
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^\d{10}$/;
+
+  GoogleSignin.configure({
+    webClientId: "338110400267-gklnb04mf7ov50cs78dorpb4jg1gbdt1.apps.googleusercontent.com",
+  });
+
+  // function to open the support link for enabling google play
+  function openSupportLink() {
+    const supportLink = "https://support.google.com/googleplay/answer/9037938?hl=en";
+    Linking.openURL(supportLink);
+  }
+
+  const onGoogleButtonPress = async () => {
+    try {
+      const isPlayServices = await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      if (isPlayServices) {
+        // Get the users ID token
+        const {idToken} = await GoogleSignin.signIn();
+
+        // Create a Google credential with the token in firebase
+        const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+        // Sign-in the user with the credential in firebase
+        const userCredential = await auth().signInWithCredential(googleCredential);
+        navigation.navigate("Dashboard");
+      } else {
+        Alert.alert("Play Services Not Available", "Please check your device settings or use another login method.", [{text: "OK", onPress: () => openSupportLink()}]);
+      }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+    }
+  };
 
   const authenticateWithFaceID = async () => {
     try {
@@ -158,6 +190,9 @@ export default function SignInPage() {
             <TouchableOpacity onPress={() => navigation.navigate("SignUpPage")} style={styles.signUpButton}>
               <Text>Sign Up</Text>
             </TouchableOpacity>
+            <View style={styles.googleContainer}>
+              <GoogleSigninButton onPress={() => onGoogleButtonPress()} />
+            </View>
           </View>
         )}
       </KeyboardAvoidingView>

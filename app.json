@@ -20,7 +20,8 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID"
-      }
+      },
+      "buildNumber": "2" 
     },
     "android": {
       "adaptiveIcon": {
@@ -38,6 +39,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "@react-native-google-signin/google-signin",
       "expo-secure-store",
       "expo-local-authentication",
       [

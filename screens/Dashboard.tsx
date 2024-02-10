@@ -90,6 +90,7 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>Signed In User: {auth().currentUser?.email}</Text>
       <TextInput value={newEmail} style={styles.input} placeholder="Email/Phone" autoCapitalize="none" onChangeText={(text) => setNewEmail(text)} />
       {loading ? (
         <ActivityIndicator size="large" color="#0000f" />
@@ -113,6 +114,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#fff",
+  },
+  text: {
+    marginVertical: 4,
+    height: 50,
+    padding: 10,
+    textAlign: "center",
   },
   input: {
     marginVertical: 4,
