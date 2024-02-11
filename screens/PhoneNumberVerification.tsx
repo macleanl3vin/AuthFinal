@@ -1,7 +1,7 @@
 import {View, Text, KeyboardAvoidingView, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Alert} from "react-native";
 import React, {useState} from "react";
 import {useNavigation} from "@react-navigation/native";
-import auth from "@react-native-firebase/auth";
+import auth, {firebase} from "@react-native-firebase/auth";
 import {FIREBASE_APP} from "../FirebaseConfig";
 
 import * as SecureStore from "expo-secure-store";
@@ -12,6 +12,7 @@ import {collection, doc, getFirestore, setDoc} from "firebase/firestore";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 import {getValueFor, save} from "../helperFunctions/StorageFunctions";
+import {PhoneAuthProvider} from "firebase/auth";
 
 interface PageThreeProps {
   route: any;
@@ -92,17 +93,21 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
   };
 
   const sendVerificaitonCode = async () => {
-    alert("Im walking here");
-    // try {
-    //   // Handle the verify phone button press
-    //   const phoneAuth = await auth().verifyPhoneNumber(phone);
-    //   const verificationId = phoneAuth.verificationId;
-    //   alert("Verification code sent");
-    //   setConfirmation(verificationId);
-    // } catch (error) {
-    //   console.log(error);
-    //   Alert.alert("Error Sending Verification Code");
-    // }
+    setLoading(true);
+
+    try {
+      // Handle the verify phone button press
+      const phoneAuth = await firebase.auth().verifyPhoneNumber(phone);
+
+      const verificationId = phoneAuth.verificationId;
+      alert("Verification code sent");
+      setConfirmation(verificationId);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error Sending Verification Code");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

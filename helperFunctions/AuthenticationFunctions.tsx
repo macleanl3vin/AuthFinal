@@ -1,4 +1,4 @@
-import auth, {FirebaseAuthTypes} from "@react-native-firebase/auth";
+import auth, {firebase, FirebaseAuthTypes} from "@react-native-firebase/auth";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 // import "firebase/compat/auth";
@@ -14,14 +14,15 @@ export async function linkPhoneNumberToAccount(
   verificationCode: string
 ): Promise<FirebaseAuthTypes.UserCredential | undefined> {
   try {
+    const current_user = firebase.auth().currentUser;
     // Check if a user exists
-    if (user) {
+    if (current_user) {
       // assigns newly created phone authentication credentials to the credential variable.
-      const credential = auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+      const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
 
       // links the provided phone number to the currently logged in user's Firebase account.
       // uses the phone authentication credentials obtained during code verification/confirmation above.
-      const cred = await user?.linkWithCredential(credential);
+      const cred = await current_user.linkWithCredential(credential);
 
       console.log("Phone number linked to account successfully");
       return cred;
