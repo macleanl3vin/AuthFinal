@@ -28,11 +28,6 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
   const db = getFirestore(FIREBASE_APP);
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
 
-  const sendVerificaitonCode = async () => {
-    const phoneVerificationConfirmation = await initiatePhoneNumberVerification(phone);
-    setConfirmation(phoneVerificationConfirmation);
-  };
-
   const handleAlert = async (decision: String) => {
     if (decision == "YES") {
       const result = await LocalAuthentication.authenticateAsync({
@@ -94,6 +89,20 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
     } finally {
       setLoading(false);
     }
+  };
+
+  const sendVerificaitonCode = async () => {
+    alert("Im walking here");
+    // try {
+    //   // Handle the verify phone button press
+    //   const phoneAuth = await auth().verifyPhoneNumber(phone);
+    //   const verificationId = phoneAuth.verificationId;
+    //   alert("Verification code sent");
+    //   setConfirmation(verificationId);
+    // } catch (error) {
+    //   console.log(error);
+    //   Alert.alert("Error Sending Verification Code");
+    // }
   };
 
   return (

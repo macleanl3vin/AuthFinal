@@ -1,11 +1,12 @@
 import auth, {FirebaseAuthTypes} from "@react-native-firebase/auth";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
-import "firebase/compat/auth";
+// import "firebase/compat/auth";
 import {QuerySnapshot, collection, getDocs, getFirestore, query, where} from "firebase/firestore";
 import {Alert, Linking} from "react-native";
 import {EditorParams} from "../App";
 import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
+import {PhoneAuthProvider} from "firebase/auth";
 
 export async function linkPhoneNumberToAccount(
   user: FirebaseAuthTypes.User | null,
@@ -37,7 +38,6 @@ export async function initiatePhoneNumberVerification(phoneNumber: string): Prom
   try {
     // Initiate phone number verification
     const phoneAuth = await auth().verifyPhoneNumber(phoneNumber);
-
     // Extract verificationId from phoneAuth reference
     const verificationId = phoneAuth.verificationId;
 

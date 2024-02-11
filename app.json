@@ -21,7 +21,7 @@
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID"
       },
-      "buildNumber": "3" 
+      "buildNumber": "6"
     },
     "android": {
       "adaptiveIcon": {
@@ -40,6 +40,8 @@
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
       "expo-secure-store",
       "expo-local-authentication",
       [
@@ -64,6 +66,12 @@
       "eas": {
         "projectId": "1ed14efd-9998-4b8e-b2fd-3e80a3222b04"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1ed14efd-9998-4b8e-b2fd-3e80a3222b04"
     }
   }
 }
