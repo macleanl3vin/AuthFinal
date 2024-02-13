@@ -2,6 +2,7 @@
 import {initializeApp} from "firebase/app";
 import {getAuth, initializeAuth, getReactNativePersistence} from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,3 +21,4 @@ const auth = initializeAuth(FIREBASE_APP, {
 });
 
 export const FIREBASE_AUTH = getAuth(FIREBASE_APP);
+export const FIREBASE_ANALYTICS = getAnalytics(FIREBASE_APP);

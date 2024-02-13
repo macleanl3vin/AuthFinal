@@ -31,6 +31,7 @@ export default function SignUpPage() {
 
       const phoneExists = await checkIfPhoneNumberIsRegistered(fullPhoneNumber);
       console.log("test1");
+
       // If the email or the phone number is registered, alert the user.
       if (emailExists || phoneExists) {
         alert("Credentials already In use. Please sign in.");

@@ -29,7 +29,6 @@
 			<array>
 				<string>com.maclean.levin.iosFaceId</string>
 				<string>app-1-338110400267-ios-0cac8d67514a675618040e</string>
-
 			</array>
 		</dict>
 		<dict>
@@ -61,6 +60,10 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to use Face ID</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

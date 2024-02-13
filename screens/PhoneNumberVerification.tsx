@@ -2,10 +2,11 @@ import {View, Text, KeyboardAvoidingView, TextInput, ActivityIndicator, Touchabl
 import React, {useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import auth, {firebase} from "@react-native-firebase/auth";
-import {FIREBASE_APP} from "../FirebaseConfig";
+import {FIREBASE_ANALYTICS, FIREBASE_APP, FIREBASE_AUTH} from "../FirebaseConfig";
 
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 import {initiatePhoneNumberVerification, linkPhoneNumberToAccount} from "../helperFunctions/AuthenticationFunctions";
 import {collection, doc, getFirestore, setDoc} from "firebase/firestore";
@@ -100,11 +101,21 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
       const phoneAuth = await firebase.auth().verifyPhoneNumber(phone);
 
       const verificationId = phoneAuth.verificationId;
+
       alert("Verification code sent");
+      const analytics = getAnalytics();
+
+      // Log successful verification attempt
+      logEvent(analytics, "phone_verification_success", {
+        phoneAuth: phoneAuth,
+        phone: phone,
+      });
+
       setConfirmation(verificationId);
     } catch (error) {
+      // Log failed verification attempt
       console.log(error);
-      Alert.alert("Error Sending Verification Code");
+      alert("Error Sending Verification Code");
     } finally {
       setLoading(false);
     }
