@@ -12,8 +12,9 @@ import {initiatePhoneNumberVerification, linkPhoneNumberToAccount} from "../help
 import {collection, doc, getFirestore, setDoc} from "firebase/firestore";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
-import {getValueFor, save} from "../helperFunctions/StorageFunctions";
+import {getValueFor, handleAlert, save} from "../helperFunctions/StorageFunctions";
 import {PhoneAuthProvider} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface PageThreeProps {
   route: any;
@@ -30,44 +31,20 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
   const db = getFirestore(FIREBASE_APP);
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
 
-  const handleAlert = async (decision: String) => {
-    if (decision == "YES") {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Authenticate with Face ID",
-        disableDeviceFallback: false,
-      });
-      if (result.success) {
-        const opt_into_face_auth = {answer: "YES"};
-
-        save("opt_into_face_auth", opt_into_face_auth);
-
-        save("UserKey", {user: email, password: password});
-
-        const isFirstTimeOpened = await SecureStore.getItemAsync("firstTimeOpened");
-
-        if (isFirstTimeOpened) {
-          await SecureStore.setItemAsync("firstTimeOpened", "false");
-        }
-      }
-    } else {
-      // Saving as no before show OS system prompt will allow them to enable this in the future easily.
-      const opt_into_face_auth = {answer: "NO"};
-      save("opt_into_face_auth", opt_into_face_auth);
-    }
-  };
-
   const allowFaceID = async () => {
+    console.log("allowFaceID");
     try {
       let returnValue = await getValueFor("opt_into_face_auth");
 
       if (returnValue == null) {
         Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO")},
-          {text: "YES", onPress: () => handleAlert("YES")},
+          {text: "NO", onPress: () => handleAlert("NO", email, password)},
+          {text: "YES", onPress: () => handleAlert("YES", email, password)},
         ]);
       }
     } catch (error) {
       console.error("Error during authentication:", error);
+      Alert.alert(`Error during authentication: ${error}`);
     }
   };
 
@@ -88,6 +65,7 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
     } catch (error) {
       setLoading(false);
       console.log(`Error confirming verification code: ${error}`);
+      alert(`Error confirming verification code: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -103,6 +81,8 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
       const verificationId = phoneAuth.verificationId;
 
       alert("Verification code sent");
+      setConfirmation(verificationId);
+
       const analytics = getAnalytics();
 
       // Log successful verification attempt
@@ -110,12 +90,10 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
         phoneAuth: phoneAuth,
         phone: phone,
       });
-
-      setConfirmation(verificationId);
     } catch (error) {
       // Log failed verification attempt
       console.log(error);
-      alert("Error Sending Verification Code");
+      alert(`Error Sending Verification Code ${error}`);
     } finally {
       setLoading(false);
     }
@@ -129,8 +107,8 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
           <ActivityIndicator size="large" color="#0000f" />
         ) : (
           <View style={styles.ButtonContainer}>
-            <TouchableOpacity onPress={handleCodeConfirmation} style={styles.signUpButton} disabled={loading}>
-              <Text>Next</Text>
+            <TouchableOpacity onPress={handleCodeConfirmation} style={styles.proceedButton} disabled={loading}>
+              <Text>Confirm Code</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={sendVerificaitonCode} style={styles.signUpButton} disabled={loading}>
               <Text>Send Verification</Text>

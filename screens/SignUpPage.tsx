@@ -4,11 +4,13 @@ import auth from "@react-native-firebase/auth";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 
-import {ActivityIndicator, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, Alert, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
 import {checkIfEmailIsRegistered, checkIfPhoneNumberIsRegistered} from "../helperFunctions/AuthenticationFunctions";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
+import {getAnalytics, logEvent} from "firebase/analytics";
+import {FirebaseError} from "firebase/app";
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function SignUpPage() {
 
       // If the email or the phone number is registered, alert the user.
       if (emailExists || phoneExists) {
-        alert("Credentials already In use. Please sign in.");
+        Alert.alert("Credentials already In use. Please sign in.");
       } else {
         const userCred = await auth().createUserWithEmailAndPassword(email, password);
 
@@ -44,14 +46,37 @@ export default function SignUpPage() {
 
           navigation.navigate("AwaitEmailVerification", {userEmail: email, userPassword: password, fullPhone: fullPhoneNumber});
         } else {
-          alert("Cannot send verification email, user does not exist.");
+          Alert.alert("Cannot send verification email, user does not exist.");
         }
       }
     } catch (error) {
+      const firebaseError = error as FirebaseError;
+
+      if (firebaseError.code == "auth/email-already-in-use") {
+        Alert.alert("Invalid Email", "Already In use.");
+      } else if (firebaseError.code == "auth/weak-password") {
+        Alert.alert("Invalid Password", "Weak password, try again.");
+      } else if (firebaseError.code === "auth/missing-android-pkg-name") {
+        Alert.alert("Error", "An Android package name must be provided if the Android app is required to be installed.");
+      } else if (firebaseError.code === "auth/missing-continue-uri") {
+        Alert.alert("Error", "A continue URL must be provided in the request.");
+      } else if (firebaseError.code === "auth/missing-ios-bundle-id") {
+        Alert.alert("Error", "An iOS bundle ID must be provided if an App Store ID is provided.");
+      } else if (firebaseError.code === "auth/invalid-continue-uri") {
+        Alert.alert("Error", "The continue URL provided in the request is invalid.");
+      } else if (firebaseError.code === "auth/unauthorized-continue-uri") {
+        Alert.alert("Error", "The domain of the continue URL is not whitelisted. Whitelist the domain in the Firebase console.");
+      }
+
       setLoading(false);
+      const analytics = getAnalytics();
+
+      logEvent(analytics, "phone_verification_success", {
+        error: JSON.stringify(error),
+      });
 
       console.error("Unexpected error:", error);
-      alert("Unexpected error");
+      Alert.alert(`Unexpected error ${error}`);
     } finally {
       setLoading(false);
     }

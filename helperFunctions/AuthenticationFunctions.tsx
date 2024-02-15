@@ -7,6 +7,7 @@ import {Alert, Linking} from "react-native";
 import {EditorParams} from "../App";
 import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
 import {PhoneAuthProvider} from "firebase/auth";
+import {FirebaseError} from "firebase/app";
 
 export async function linkPhoneNumberToAccount(
   user: FirebaseAuthTypes.User | null,
@@ -30,6 +31,30 @@ export async function linkPhoneNumberToAccount(
       alert("User is does not exist. Unable to link phone number to account.");
     }
   } catch (error) {
+    const firebaseError = error as FirebaseError;
+
+    if (firebaseError.code === "auth/provider-already-linked") {
+      Alert.alert("Error", "The provider has already been linked to the user.");
+    } else if (firebaseError.code === "auth/invalid-credential") {
+      Alert.alert("Error", "The provider's credential is not valid. Please check the documentation and parameters.");
+    } else if (firebaseError.code === "auth/credential-already-in-use") {
+      Alert.alert("Error", "The account corresponding to the credential already exists or is already linked to a Firebase User.");
+    } else if (firebaseError.code === "auth/email-already-in-use") {
+      Alert.alert("Error", "The email corresponding to the credential already exists among your users.");
+    } else if (firebaseError.code === "auth/operation-not-allowed") {
+      Alert.alert("Error", "The provider is not enabled. Please configure it in the Firebase Console.");
+    } else if (firebaseError.code === "auth/invalid-email") {
+      Alert.alert("Error", "The email used is invalid.");
+    } else if (firebaseError.code === "auth/wrong-password") {
+      Alert.alert("Error", "The password is incorrect.");
+    } else if (firebaseError.code === "auth/invalid-verification-code") {
+      Alert.alert("Error", "The verification code is not valid.");
+    } else if (firebaseError.code === "auth/invalid-verification-id") {
+      Alert.alert("Error", "The verification ID is not valid.");
+    } else {
+      Alert.alert("Unexpected Error");
+    }
+
     console.error("Error linking phone number to account:", error);
     throw error;
   }
@@ -46,6 +71,8 @@ export async function initiatePhoneNumberVerification(phoneNumber: string): Prom
     return verificationId;
   } catch (error) {
     console.error("Error initiating phone number verification:", error);
+    Alert.alert("Error", `Could not initiate phone number verification ${error}`);
+
     throw error;
   }
 }
@@ -58,7 +85,17 @@ export async function signInWithPhoneNumberAndCode(verificationId: string, verif
     await auth().signInWithCredential(phoneCredential);
   } catch (error) {
     console.error("Error signing in with phone number and verification code:", error);
-    throw error;
+    const firebaseError = error as FirebaseError;
+
+    if (firebaseError.code === "auth/account-exists-with-different-credential") {
+      Alert.alert("Error", "Account already linked with different credential");
+    } else if (firebaseError.code === "auth/invalid-credential") {
+      Alert.alert("Error", "The provider's credential is not valid. Please check the documentation and parameters.");
+    } else if (firebaseError.code === "auth/operation-not-allowed") {
+      Alert.alert("Error", "account corresponding to the credential is not enabled");
+    } else {
+      Alert.alert("Unexpected Error");
+    }
   }
 }
 

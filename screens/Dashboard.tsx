@@ -23,7 +23,6 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
   const handleLogout = async () => {
     try {
       await auth().signOut();
-
       console.log("User logged out successfully");
       navigation.navigate("SignInPage");
     } catch (error) {
@@ -84,10 +83,9 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
         }
       }
     } catch (error) {
-      alert("Could not change your email!");
+      alert(`Could not change your email! ${error}`);
     }
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Signed In User: {auth().currentUser?.email}</Text>

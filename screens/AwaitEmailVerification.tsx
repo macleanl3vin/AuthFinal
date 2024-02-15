@@ -19,6 +19,7 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
 
   // function that checks if email is verified
   const checkEmailVerification = async () => {
+    setLoading(true);
     try {
       // reloads the user's credentials/data
       await auth().currentUser?.reload();
@@ -57,7 +58,7 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
         navigation.navigate("PhoneNumberVerification", {email: userEmail, phone: fullPhone, password: userPassword});
       } catch (error) {
         console.error("Error navigating to PhoneNumberVerification:", error);
-        alert("An error occurred while navigating. Please try again.");
+        alert(`An error occurred while navigating. ${error}`);
       } finally {
         setLoading(false);
       }
@@ -66,8 +67,8 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Check your email for verification. Press next if verified.</Text>
-      {loading ? <ActivityIndicator size="large" color="#0000f" /> : <View style={styles.ButtonContainer}></View>}
+      <Text style={styles.text}>Waiting for email verification... Check your email.</Text>
+      {loading ? <ActivityIndicator size="large" color="#0000f" /> : <View></View>}
     </View>
   );
 }
@@ -85,35 +86,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#ffffff",
     textAlign: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 1.84,
+
     elevation: 5,
-  },
-  button: {
-    backgroundColor: "#fff",
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 20,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 2.84,
-    elevation: 5,
-  },
-  ButtonContainer: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    marginTop: 20,
-    gap: 15,
-    paddingHorizontal: 20,
   },
 });

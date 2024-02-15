@@ -6,10 +6,11 @@ import {FirebaseError} from "firebase/app";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 
-import {getValueFor, save} from "../helperFunctions/StorageFunctions";
+import {getValueFor, handleAlert, save} from "../helperFunctions/StorageFunctions";
 import {useRoute} from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // This or useRoute()?
 interface EnterPasswordProps {
   route: any;
@@ -21,36 +22,6 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
   const {email} = route?.params;
 
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
-
-  const handleAlert = async (decision: String) => {
-    try {
-      if (decision == "YES") {
-        const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Authenticate with Face ID",
-          disableDeviceFallback: false,
-        });
-        if (result.success) {
-          const opt_into_face_auth = {answer: "YES"};
-
-          save("opt_into_face_auth", opt_into_face_auth);
-          save("UserKey", {user: email, password: password});
-
-          const isFirstTimeOpened = await SecureStore.getItemAsync("firstTimeOpened");
-
-          if (isFirstTimeOpened) {
-            await SecureStore.setItemAsync("firstTimeOpened", "false");
-          }
-        }
-      } else {
-        // Saving as no before show OS system prompt will allow them to enable this in the future easily.
-        const opt_into_face_auth = {answer: "NO"};
-        save("opt_into_face_auth", opt_into_face_auth);
-        console.log("NO");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const SignIn = async () => {
     try {
@@ -83,8 +54,8 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
 
       if (returnValue == null) {
         Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO")},
-          {text: "YES", onPress: () => handleAlert("YES")},
+          {text: "NO", onPress: () => handleAlert("NO", email, password)},
+          {text: "YES", onPress: () => handleAlert("YES", email, password)},
         ]);
 
         const userCredential = await auth().signInWithEmailAndPassword(email, password);
@@ -107,11 +78,8 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
           // If email is not verified, show an alert
           Alert.alert("Email not verified", "Please verify your email before proceeding.");
         }
-        console.log(`User logged in manually with ${email}, ${password}`);
       }
     } catch (error) {
-      console.error("Error signing in:", error);
-
       // Check for specific error codes
       const firebaseError = error as FirebaseError;
 

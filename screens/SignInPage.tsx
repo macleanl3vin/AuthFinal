@@ -4,7 +4,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 
 import {useNavigation, useIsFocused} from "@react-navigation/native";
 import {checkIfEmailIsRegistered, checkIfPhoneNumberIsRegistered, initiatePhoneNumberVerification} from "../helperFunctions/AuthenticationFunctions";
-import auth from "@react-native-firebase/auth";
+import auth, {firebase} from "@react-native-firebase/auth";
 
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
@@ -13,6 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import {getValueFor} from "../helperFunctions/StorageFunctions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
+import {FirebaseError} from "firebase/app";
 
 export default function SignInPage() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -28,12 +29,10 @@ export default function SignInPage() {
     webClientId: "338110400267-gklnb04mf7ov50cs78dorpb4jg1gbdt1.apps.googleusercontent.com",
   });
 
-  // function to open the support link for enabling google play
   function openSupportLink() {
     const supportLink = "https://support.google.com/googleplay/answer/9037938?hl=en";
     Linking.openURL(supportLink);
   }
-
   const onGoogleButtonPress = async () => {
     try {
       const isPlayServices = await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
@@ -46,12 +45,18 @@ export default function SignInPage() {
 
         // Sign-in the user with the credential in firebase
         const userCredential = await auth().signInWithCredential(googleCredential);
+
+        // if (userCredential) {
         navigation.navigate("Dashboard");
+        // } else {
+        // Alert.alert("Error Signing In", "Could not sign you in with given credentials");
+        // }
       } else {
         Alert.alert("Play Services Not Available", "Please check your device settings or use another login method.", [{text: "OK", onPress: () => openSupportLink()}]);
       }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
+      alert(`Unexpected error: ${error}`);
     }
   };
 
@@ -67,45 +72,65 @@ export default function SignInPage() {
         // Retrieve data stored locally using Face ID
         return getValueFor("UserKey");
       } else {
-        Alert.alert("Face ID Authentication", "Authentication failed");
+        Alert.alert("Face Authentication", "Authentication failed, No Data Fetched");
       }
     } catch (error) {
+      alert(`Face authentication Failed: ${error}`);
       console.error("Error during authentication:", error);
     }
   };
 
   const handleAuthentication = async () => {
-    let isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
+    try {
+      let isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
 
-    if (!isFirstTimeOpened) {
-      // Clean up data if it's the first time the app is opened
-      await cleanUpData();
-      await AsyncStorage.setItem("firstTimeOpened", "true");
-    }
+      console.log("Is first time opened:", isFirstTimeOpened);
+      if (isFirstTimeOpened === null) {
+        Alert.alert(`First time opened: ${isFirstTimeOpened}`);
+        // Clean up data if it's the first time the app is opened
+        await cleanUpData();
+      } else {
+        console.log("isFirstTimeOpened: ", isFirstTimeOpened);
+      }
 
-    let returnValue = await getValueFor("opt_into_face_auth");
+      let returnValue = await getValueFor("opt_into_face_auth");
+      let changePassword = await getValueFor("change_password");
 
-    let changePassword = await getValueFor("change_password");
+      if (returnValue == null || returnValue.answer === "NO" || changePassword?.change_password === "true") {
+        // Initiate manual sign in/sign up flow
+        console.log("opt_into_face_auth is", returnValue);
+        console.log("change_password is", changePassword);
+      } else if ("answer" in returnValue && returnValue.answer === "YES" && (changePassword?.change_password === false || changePassword?.changePassword === null)) {
+        // Initiate face ID sign in flow
 
-    if (returnValue == null || returnValue.answer === "NO" || changePassword?.change_password === true) {
-      // Initiate manual sign in/sign up flow
-      console.log("opt_into_face_auth is", returnValue);
-      console.log("change_password is", changePassword);
-    } else if ("answer" in returnValue && returnValue.answer === "YES" && changePassword?.change_password === false) {
-      // Initiate face ID sign in flow
-      const userCred = await authenticateWithFaceID();
+        const userCred = await authenticateWithFaceID();
 
-      if (userCred && "user" in userCred && "password" in userCred) {
-        console.log(userCred?.user, userCred?.password);
-        let user: string = userCred.user as string;
-        let password: string = userCred.password as string;
+        if (userCred && "user" in userCred && "password" in userCred) {
+          console.log(userCred?.user, userCred?.password);
+          let user: string = userCred.user as string;
+          let password: string = userCred.password as string;
 
-        let signIn = await auth().signInWithEmailAndPassword(user, password);
-        if (signIn) {
-          navigation.navigate("Dashboard");
-        } else {
-          Alert.alert("Error Signing In", "Credentials incorrect");
+          let signIn = await auth().signInWithEmailAndPassword(user, password);
+          if (signIn) {
+            navigation.navigate("Dashboard");
+          } else {
+            Alert.alert("Error Signing In", "Credentials incorrect");
+          }
         }
+      }
+    } catch (error) {
+      const firebaseError = error as FirebaseError;
+
+      if (firebaseError.code == "auth/invalid-email ") {
+        Alert.alert("Invalid Email", "Email is not valid");
+      } else if (firebaseError.code == "auth/user-disabled") {
+        Alert.alert("Disabled Error", "Email has been disabled.");
+      } else if (firebaseError.code == "auth/user-not-found") {
+        Alert.alert("User Not Found", "No user corresponding to the given email.");
+      } else if (firebaseError.code == "auth/wrong-password") {
+        Alert.alert("Invalid Password", "Password is invalid for the given email");
+      } else {
+        Alert.alert("Unexpected Error: handleAuthentication function");
       }
     }
   };
@@ -116,6 +141,7 @@ export default function SignInPage() {
       await SecureStore.deleteItemAsync("opt_into_face_auth");
       console.log("Sensitive data deleted.");
     } catch (error) {
+      alert(`Unexpected error: ${error}`);
       console.error("Error checking and deleting stored data:", error);
     }
   };
@@ -170,6 +196,7 @@ export default function SignInPage() {
     } catch (error) {
       setLoading(false);
       console.error("Unexpected error:", error);
+      alert(`Unexpected error: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -184,7 +211,7 @@ export default function SignInPage() {
         ) : (
           <View style={styles.ButtonContainer}>
             <TouchableOpacity onPress={SignIn} style={styles.proceedButton}>
-              <Text>Proceed</Text>
+              <Text>Sign In</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate("SignUpPage")} style={styles.signUpButton}>
@@ -202,7 +229,7 @@ export default function SignInPage() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 35,
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#fff",
@@ -228,7 +255,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-between",
     marginTop: 20,
-    gap: 15,
+    gap: 20,
     paddingHorizontal: 20,
   },
   proceedButton: {

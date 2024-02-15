@@ -24,6 +24,7 @@ export default function SignInWithPhone({route}: SignInWithPhoneProps): JSX.Elem
       navigation.navigate("Dashboard");
     } catch (error) {
       console.log("Error logging in via phone number", error);
+      alert(`Error logging in via phone number ${error}`);
       setLoading(false);
     } finally {
       setLoading(true);
