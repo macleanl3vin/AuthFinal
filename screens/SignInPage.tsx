@@ -85,8 +85,8 @@ export default function SignInPage() {
       let isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
 
       console.log("Is first time opened:", isFirstTimeOpened);
+
       if (isFirstTimeOpened === null) {
-        Alert.alert(`First time opened: ${isFirstTimeOpened}`);
         // Clean up data if it's the first time the app is opened
         await cleanUpData();
       } else {

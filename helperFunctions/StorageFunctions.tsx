@@ -17,13 +17,10 @@ export async function save(key: string, value: object) {
 }
 
 export async function getValueFor(key: string): Promise<{user: string; password: string} | {opt_into_face_auth: string} | {change_password: string} | null> {
-  let result = await SecureStore.getItemAsync(key, {
-    keychainAccessible: SecureStore.ALWAYS_THIS_DEVICE_ONLY,
-  });
+  let result = await SecureStore.getItemAsync(key);
 
   if (result && key === "UserKey") {
     const parsedObject: {user: string; password: string} = JSON.parse(result);
-    console.log(parsedObject);
     return parsedObject;
   } else if (result && key === "opt_into_face_auth") {
     const parsedObject: {opt_into_face_auth: string} = JSON.parse(result);
@@ -52,8 +49,7 @@ export const handleAlert = async (decision: String, email: String, password: Str
 
         const isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
 
-        console.log(!isFirstTimeOpened);
-        if (!isFirstTimeOpened) {
+        if (isFirstTimeOpened === null) {
           await AsyncStorage.setItem("firstTimeOpened", "false");
         }
       }
@@ -61,6 +57,12 @@ export const handleAlert = async (decision: String, email: String, password: Str
       // Saving as no before show OS system prompt will allow them to enable this in the future easily.
       const opt_into_face_auth = {answer: "NO"};
       save("opt_into_face_auth", opt_into_face_auth);
+
+      const isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
+
+      if (isFirstTimeOpened === null) {
+        await AsyncStorage.setItem("firstTimeOpened", "false");
+      }
     }
   } catch (error) {
     console.log("Unexpected error", error);

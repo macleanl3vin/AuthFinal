@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, KeyboardAvoidingView, TextInput, ActivityIndicator, TouchableOpacity} from "react-native";
+import {View, Text, StyleSheet, KeyboardAvoidingView, TextInput, ActivityIndicator, TouchableOpacity, Alert} from "react-native";
 import React, {useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import auth from "@react-native-firebase/auth";
@@ -20,14 +20,17 @@ export default function SignInWithPhone({route}: SignInWithPhoneProps): JSX.Elem
   const SignIn = async (): Promise<void> => {
     setLoading(true);
     try {
-      await signInWithPhoneNumberAndCode(confirmationCred, verificationCode);
-      navigation.navigate("Dashboard");
+      const result = await signInWithPhoneNumberAndCode(confirmationCred, verificationCode);
+
+      if (result) {
+        navigation.navigate("Dashboard");
+      } else {
+        setLoading(false);
+      }
     } catch (error) {
       console.log("Error logging in via phone number", error);
-      alert(`Error logging in via phone number ${error}`);
+      Alert.alert(`Error logging in via phone number ${error}`);
       setLoading(false);
-    } finally {
-      setLoading(true);
     }
   };
 

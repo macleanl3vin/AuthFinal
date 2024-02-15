@@ -52,6 +52,7 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
         }
       }
 
+      console.log(returnValue);
       if (returnValue == null) {
         Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
           {text: "NO", onPress: () => handleAlert("NO", email, password)},

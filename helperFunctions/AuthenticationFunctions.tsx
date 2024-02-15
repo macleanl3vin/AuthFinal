@@ -77,12 +77,17 @@ export async function initiatePhoneNumberVerification(phoneNumber: string): Prom
   }
 }
 
-export async function signInWithPhoneNumberAndCode(verificationId: string, verificationCode: string): Promise<void> {
+export async function signInWithPhoneNumberAndCode(verificationId: string, verificationCode: string): Promise<boolean | undefined> {
   try {
     // Create new AuthCredential from verificationId & verification code
     const phoneCredential = auth.PhoneAuthProvider.credential(verificationId, verificationCode);
 
-    await auth().signInWithCredential(phoneCredential);
+    const result = await auth().signInWithCredential(phoneCredential);
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
     console.error("Error signing in with phone number and verification code:", error);
     const firebaseError = error as FirebaseError;
@@ -93,6 +98,8 @@ export async function signInWithPhoneNumberAndCode(verificationId: string, verif
       Alert.alert("Error", "The provider's credential is not valid. Please check the documentation and parameters.");
     } else if (firebaseError.code === "auth/operation-not-allowed") {
       Alert.alert("Error", "account corresponding to the credential is not enabled");
+    } else if (firebaseError.code === "auth/missing-verification-code") {
+      Alert.alert("Error", "Missing verification code");
     } else {
       Alert.alert("Unexpected Error");
     }
