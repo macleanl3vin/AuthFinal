@@ -37,6 +37,7 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
           // Convert the object back to a JSON string
           const updatedUserKey = JSON.stringify(userData);
           await SecureStore.setItemAsync("change_password", updatedUserKey);
+
           const userKey = await SecureStore.getItemAsync("UserKey");
           if (userKey) {
             // Parse the JSON string to get the object

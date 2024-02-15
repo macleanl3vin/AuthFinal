@@ -84,10 +84,11 @@ export default function SignInPage() {
     try {
       let isFirstTimeOpened = await AsyncStorage.getItem("firstTimeOpened");
 
-      console.log("Is first time opened:", isFirstTimeOpened);
+      console.log("before Is first time opened:", isFirstTimeOpened);
 
       if (isFirstTimeOpened === null) {
         // Clean up data if it's the first time the app is opened
+
         await cleanUpData();
       } else {
         console.log("isFirstTimeOpened: ", isFirstTimeOpened);
@@ -96,13 +97,15 @@ export default function SignInPage() {
       let returnValue = await getValueFor("opt_into_face_auth");
       let changePassword = await getValueFor("change_password");
 
-      if (returnValue == null || returnValue.answer === "NO" || changePassword?.change_password === "true") {
+      if (returnValue == null || returnValue.answer === "NO" || changePassword?.change_password === true) {
         // Initiate manual sign in/sign up flow
-        console.log("opt_into_face_auth is", returnValue);
-        console.log("change_password is", changePassword);
-      } else if ("answer" in returnValue && returnValue.answer === "YES" && (changePassword?.change_password === false || changePassword?.changePassword === null)) {
+        Alert.alert("Initiated manual sign in/sign up flow");
+      } else if (
+        "answer" in returnValue &&
+        returnValue.answer === "YES" &&
+        (changePassword?.change_password === false || changePassword?.changePassword === undefined || changePassword?.changePassword == null)
+      ) {
         // Initiate face ID sign in flow
-
         const userCred = await authenticateWithFaceID();
 
         if (userCred && "user" in userCred && "password" in userCred) {
@@ -131,11 +134,13 @@ export default function SignInPage() {
         Alert.alert("Invalid Password", "Password is invalid for the given email");
       } else {
         Alert.alert("Unexpected Error: handleAuthentication function");
+        console.log(error);
       }
     }
   };
 
   const cleanUpData = async () => {
+    Alert.alert(`Data was deleted`);
     try {
       await SecureStore.deleteItemAsync("UserKey");
       await SecureStore.deleteItemAsync("opt_into_face_auth");
