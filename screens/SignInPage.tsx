@@ -108,6 +108,7 @@ export default function SignInPage() {
         // Initiate face ID sign in flow
         const userCred = await authenticateWithFaceID();
 
+        console.log(userCred && "user" in userCred && "password" in userCred);
         if (userCred && "user" in userCred && "password" in userCred) {
           console.log(userCred?.user, userCred?.password);
           let user: string = userCred.user as string;
