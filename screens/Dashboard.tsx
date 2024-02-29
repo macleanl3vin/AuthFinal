@@ -6,11 +6,8 @@ import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 import * as SecureStore from "expo-secure-store";
-interface DashboardProps {
-  route: any;
-}
 
-export default function Dashboard({route}: DashboardProps): JSX.Element {
+export default function Dashboard(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const [newEmail, setNewEmail] = useState("");
 
@@ -30,15 +27,13 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
     }
   };
 
-  console.log(auth().currentUser);
-
   const changeEmail = async () => {
     setLoading(true);
 
     try {
       // Make sure input is a valid email, If it isnt promp user again
-      const trimmedInput = newEmail.trim();
-      if (!trimmedInput) {
+      const trimmed_input = newEmail.trim();
+      if (!trimmed_input) {
         alert("Please enter a valid email.");
 
         setLoading(false);
@@ -46,8 +41,8 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
       }
 
       // Confirm user input is a valid email
-      if (emailRegex.test(trimmedInput)) {
-        auth().currentUser?.verifyBeforeUpdateEmail(trimmedInput);
+      if (emailRegex.test(trimmed_input)) {
+        auth().currentUser?.verifyBeforeUpdateEmail(trimmed_input);
 
         Alert.alert("Verify your new email");
 
@@ -55,25 +50,27 @@ export default function Dashboard({route}: DashboardProps): JSX.Element {
         const q = query(userCollection, where("email", "==", currentEmail));
         const querySnapshot: QuerySnapshot = await getDocs(q);
 
-        const userKey = await SecureStore.getItemAsync("UserKey");
-        if (userKey) {
+        const user_key = await SecureStore.getItemAsync("user_key");
+
+        // Save user data locally after email change
+        if (user_key) {
           // Parse the JSON string to get the object
-          const userData = JSON.parse(userKey);
+          const user_data = JSON.parse(user_key);
 
           // Update the user property with the new email
-          userData.user = newEmail;
+          user_data.user = newEmail;
 
           // Convert the object back to a JSON string
-          const updatedUserKey = JSON.stringify(userData);
-          await SecureStore.setItemAsync("UserKey", updatedUserKey);
+          const updated_user_key = JSON.stringify(user_data);
+          await SecureStore.setItemAsync("user_key", updated_user_key);
         }
 
         if (!querySnapshot.empty) {
           // Assuming there is only one document with the specific email, which there should be.
           const doc = querySnapshot.docs[0];
           // Update the document with the new email
-          const newData = {email: trimmedInput};
-          await updateDoc(doc.ref, newData);
+          const new_data = {email: trimmed_input};
+          await updateDoc(doc.ref, new_data);
 
           await auth().signOut();
 

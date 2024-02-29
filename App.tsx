@@ -12,9 +12,9 @@ import SignInWithPhone from "./screens/SignInWithPhone";
 export type EditorParams = {
   SignUpPage: undefined;
   AwaitEmailVerification: {
-    userEmail: string;
-    userPassword: string;
-    fullPhone: string;
+    user_email: string;
+    user_password: string;
+    full_phone: string;
   };
   PhoneNumberVerification: {
     email: string;
@@ -26,11 +26,11 @@ export type EditorParams = {
     email: string;
   };
   SignInWithPhone: {
-    confirmationCred: string;
+    confirmation_cred: string;
   };
   Dashboard:
     | {
-        currentEmail: string | null;
+        current_email: string | null;
       }
     | undefined;
 };

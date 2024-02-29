@@ -140,3 +140,60 @@ export const checkIfEmailIsRegistered = async (email: string): Promise<boolean> 
     throw error;
   }
 };
+
+export const firebaseErrorHandling = (error: FirebaseError): {title: string; message: string} => {
+  let title = "";
+  let message = "";
+
+  switch (error.code) {
+    case "auth/invalid-email":
+      title = "Invalid Email";
+      message = "The email address is badly formatted.";
+      break;
+    case "auth/user-disabled":
+      title = "User Disabled";
+      message = "The user corresponding to the given email has been disabled.";
+      break;
+    case "auth/user-not-found":
+      title = "User Not Found";
+      message = "There is no user corresponding to the given email.";
+      break;
+    case "auth/wrong-password":
+      title = "Wrong Password";
+      message = "The password is invalid for the given email.";
+      break;
+    case "auth/email-already-in-use":
+      title = "Email Already in Use";
+      message = "The email address is already in use.";
+      break;
+    case "auth/weak-password":
+      title = "Weak Password";
+      message = "The password provided is too weak.";
+      break;
+    case "auth/missing-android-pkg-name":
+      title = "Missing Android Package Name";
+      message = "An Android package name must be provided if the Android app is required to be installed.";
+      break;
+    case "auth/missing-continue-uri":
+      title = "Missing Continue URI";
+      message = "A continue URL must be provided in the request.";
+      break;
+    case "auth/missing-ios-bundle-id":
+      title = "Missing iOS Bundle ID";
+      message = "An iOS bundle ID must be provided if an App Store ID is provided.";
+      break;
+    case "auth/invalid-continue-uri":
+      title = "Invalid Continue URI";
+      message = "The continue URL provided in the request is invalid.";
+      break;
+    case "auth/unauthorized-continue-uri":
+      title = "Unauthorized Continue URI";
+      message = "The domain of the continue URL is not whitelisted. Whitelist the domain in the Firebase console.";
+      break;
+    default:
+      title = "Firebase Error";
+      message = "An unexpected error occurred. Please try again later.";
+      break;
+  }
+  return {title, message};
+};

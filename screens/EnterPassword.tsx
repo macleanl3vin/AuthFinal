@@ -6,11 +6,12 @@ import {FirebaseError} from "firebase/app";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 
-import {getValueFor, handleAlert, save} from "../helperFunctions/StorageFunctions";
+import {getValueFor, handleAlert, handleForgotPassword, save} from "../helperFunctions/StorageFunctions";
 import {useRoute} from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {firebaseErrorHandling} from "../helperFunctions/AuthenticationFunctions";
 // This or useRoute()?
 interface EnterPasswordProps {
   route: any;
@@ -25,71 +26,44 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
 
   const SignIn = async () => {
     try {
-      let returnValue = await getValueFor("opt_into_face_auth");
-      let forgotPassword = await SecureStore.getItemAsync("change_password");
+      const user_credential = await auth().signInWithEmailAndPassword(email, password);
 
-      if (forgotPassword) {
-        const userData = JSON.parse(forgotPassword);
-        console.log(userData.change_password);
+      if (user_credential) {
+        let opt_into_face_authVal = await getValueFor("opt_into_face_auth");
+        let forgotPassword = await SecureStore.getItemAsync("change_password");
 
-        if (userData.change_password === "true") {
-          userData.change_password = false;
-          // Convert the object back to a JSON string
-          const updatedUserKey = JSON.stringify(userData);
-          await SecureStore.setItemAsync("change_password", updatedUserKey);
+        handleForgotPassword(forgotPassword, password);
 
-          const userKey = await SecureStore.getItemAsync("UserKey");
-          if (userKey) {
-            // Parse the JSON string to get the object
-            const userData = JSON.parse(userKey);
+        if (opt_into_face_authVal == null) {
+          Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
+            {text: "NO", onPress: () => handleAlert("NO", email, password)},
+            {text: "YES", onPress: () => handleAlert("YES", email, password)},
+          ]);
 
-            // Update the user property with the new email
-            userData.password = password;
+          if (user_credential) {
+            navigation.navigate("Dashboard", {current_email: email});
+          } else {
+            Alert.alert("Error Logging In", "User not found");
+          }
+        } else if ("answer" in opt_into_face_authVal && (opt_into_face_authVal.answer === "NO" || opt_into_face_authVal.answer === "YES")) {
+          const user_credential = await auth().signInWithEmailAndPassword(email, password);
+          const user = user_credential.user;
 
-            // Convert the object back to a JSON string
-            const updatedUserKey = JSON.stringify(userData);
-            await SecureStore.setItemAsync("UserKey", updatedUserKey);
+          // If email is verified, proceed to the Dashboard
+          if (user && user.emailVerified) {
+            await user.reload();
+
+            navigation.navigate("Dashboard", {current_email: user.email});
+          } else {
+            // If email is not verified, show an alert
+            Alert.alert("Email not verified", "Please verify your email before proceeding.");
           }
         }
       }
-
-      console.log(returnValue);
-      if (returnValue == null) {
-        Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO", email, password)},
-          {text: "YES", onPress: () => handleAlert("YES", email, password)},
-        ]);
-
-        const userCredential = await auth().signInWithEmailAndPassword(email, password);
-
-        if (userCredential) {
-          navigation.navigate("Dashboard", {currentEmail: email});
-        } else {
-          Alert.alert("Error Logging In", "User not found");
-        }
-      } else if ("answer" in returnValue && (returnValue.answer === "NO" || returnValue.answer === "YES")) {
-        const userCredential = await auth().signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-
-        // If email is verified, proceed to the Dashboard
-        if (user && user.emailVerified) {
-          await user.reload();
-
-          navigation.navigate("Dashboard", {currentEmail: user.email});
-        } else {
-          // If email is not verified, show an alert
-          Alert.alert("Email not verified", "Please verify your email before proceeding.");
-        }
-      }
     } catch (error) {
-      // Check for specific error codes
-      const firebaseError = error as FirebaseError;
-
-      if (firebaseError.code == "auth/wrong-password") {
-        Alert.alert("Invalid Password", "Please check your password and try again.");
-      } else if (firebaseError.code == "auth/user-not-found") {
-        Alert.alert("User Error", "Email may not be verified, check email.");
-      }
+      const firebase_error = error as FirebaseError;
+      const {title, message} = firebaseErrorHandling(firebase_error);
+      Alert.alert(title, message);
     } finally {
       setLoading(false);
     }
@@ -100,6 +74,7 @@ export default function EnterPassword({route}: EnterPasswordProps): JSX.Element 
 
     try {
       await auth().sendPasswordResetEmail(email);
+      // change key name
       const value = {change_password: "true"};
       save("change_password", value);
 

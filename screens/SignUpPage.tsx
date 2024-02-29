@@ -1,12 +1,10 @@
 import {useNavigation} from "@react-navigation/native";
 import React, {useState} from "react";
 import auth from "@react-native-firebase/auth";
-import * as LocalAuthentication from "expo-local-authentication";
-import * as SecureStore from "expo-secure-store";
 
 import {ActivityIndicator, Alert, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 
-import {checkIfEmailIsRegistered, checkIfPhoneNumberIsRegistered} from "../helperFunctions/AuthenticationFunctions";
+import {checkIfEmailIsRegistered, checkIfPhoneNumberIsRegistered, firebaseErrorHandling} from "../helperFunctions/AuthenticationFunctions";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
 import {getAnalytics, logEvent} from "firebase/analytics";
@@ -28,52 +26,38 @@ export default function SignUpPage() {
 
     try {
       // Checks if the email and phone # is already registered
-      const emailExists = await checkIfEmailIsRegistered(email);
+      const email_exists = await checkIfEmailIsRegistered(email);
       console.log("test");
 
-      const phoneExists = await checkIfPhoneNumberIsRegistered(fullPhoneNumber);
+      const phone_exists = await checkIfPhoneNumberIsRegistered(fullPhoneNumber);
       console.log("test1");
 
       // If the email or the phone number is registered, alert the user.
-      if (emailExists || phoneExists) {
+      if (email_exists || phone_exists) {
         Alert.alert("Credentials already In use. Please sign in.");
       } else {
-        const userCred = await auth().createUserWithEmailAndPassword(email, password);
+        const user_cred = await auth().createUserWithEmailAndPassword(email, password);
 
-        if (userCred) {
+        if (user_cred) {
           // Sending a verification email to the currently logged-in user.
           auth().currentUser?.sendEmailVerification();
 
-          navigation.navigate("AwaitEmailVerification", {userEmail: email, userPassword: password, fullPhone: fullPhoneNumber});
+          navigation.navigate("AwaitEmailVerification", {user_email: email, user_password: password, full_phone: fullPhoneNumber});
         } else {
           Alert.alert("Cannot send verification email, user does not exist.");
         }
       }
     } catch (error) {
-      const firebaseError = error as FirebaseError;
+      const firebase_error = error as FirebaseError;
+      const {title, message} = firebaseErrorHandling(firebase_error);
+      Alert.alert(title, message);
 
-      if (firebaseError.code == "auth/email-already-in-use") {
-        Alert.alert("Invalid Email", "Already In use.");
-      } else if (firebaseError.code == "auth/weak-password") {
-        Alert.alert("Invalid Password", "Weak password, try again.");
-      } else if (firebaseError.code === "auth/missing-android-pkg-name") {
-        Alert.alert("Error", "An Android package name must be provided if the Android app is required to be installed.");
-      } else if (firebaseError.code === "auth/missing-continue-uri") {
-        Alert.alert("Error", "A continue URL must be provided in the request.");
-      } else if (firebaseError.code === "auth/missing-ios-bundle-id") {
-        Alert.alert("Error", "An iOS bundle ID must be provided if an App Store ID is provided.");
-      } else if (firebaseError.code === "auth/invalid-continue-uri") {
-        Alert.alert("Error", "The continue URL provided in the request is invalid.");
-      } else if (firebaseError.code === "auth/unauthorized-continue-uri") {
-        Alert.alert("Error", "The domain of the continue URL is not whitelisted. Whitelist the domain in the Firebase console.");
-      }
+      // setLoading(false);
+      // const analytics = getAnalytics();
 
-      setLoading(false);
-      const analytics = getAnalytics();
-
-      logEvent(analytics, "phone_verification_success", {
-        error: JSON.stringify(error),
-      });
+      // logEvent(analytics, "phone_verification_success", {
+      //   error: JSON.stringify(error),
+      // });
 
       console.error("Unexpected error:", error);
       Alert.alert(`Unexpected error ${error}`);

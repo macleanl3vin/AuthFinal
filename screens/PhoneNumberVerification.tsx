@@ -4,15 +4,13 @@ import {useNavigation} from "@react-navigation/native";
 import auth, {firebase} from "@react-native-firebase/auth";
 import {FIREBASE_ANALYTICS, FIREBASE_APP, FIREBASE_AUTH} from "../FirebaseConfig";
 
-import * as SecureStore from "expo-secure-store";
-import * as LocalAuthentication from "expo-local-authentication";
 import {getAnalytics, logEvent} from "firebase/analytics";
 
 import {initiatePhoneNumberVerification, linkPhoneNumberToAccount} from "../helperFunctions/AuthenticationFunctions";
 import {collection, doc, getFirestore, setDoc} from "firebase/firestore";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {EditorParams} from "../App";
-import {getValueFor, handleAlert, save} from "../helperFunctions/StorageFunctions";
+import {allowFaceID, getValueFor, handleAlert, save} from "../helperFunctions/StorageFunctions";
 import {PhoneAuthProvider} from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -31,23 +29,6 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
   const db = getFirestore(FIREBASE_APP);
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
 
-  const allowFaceID = async () => {
-    console.log("allowFaceID");
-    try {
-      let returnValue = await getValueFor("opt_into_face_auth");
-
-      if (returnValue == null) {
-        Alert.alert('Do you want to allow "pudo" to use Face ID?', "Use Face ID to authenticate on pudo", [
-          {text: "NO", onPress: () => handleAlert("NO", email, password)},
-          {text: "YES", onPress: () => handleAlert("YES", email, password)},
-        ]);
-      }
-    } catch (error) {
-      console.error("Error during authentication:", error);
-      Alert.alert(`Error during authentication: ${error}`);
-    }
-  };
-
   const handleCodeConfirmation = async () => {
     setLoading(true);
 
@@ -55,11 +36,11 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
       await linkPhoneNumberToAccount(user, confirmation, verificationCode);
 
       // Storing users credentials in firestore under given UID
-      const userDocRef = doc(collection(db, "users"), user?.uid);
-      const userCredentials = {email, phone};
-      await setDoc(userDocRef, userCredentials);
+      const user_doc_ref = doc(collection(db, "users"), user?.uid);
+      const user_credentials = {email, phone};
+      await setDoc(user_doc_ref, user_credentials);
 
-      await allowFaceID();
+      await allowFaceID(email, password);
 
       navigation.navigate("Dashboard");
     } catch (error) {
@@ -76,20 +57,12 @@ export default function PhoneNumberVerification({route}: PageThreeProps): JSX.El
 
     try {
       // Handle the verify phone button press
-      const phoneAuth = await firebase.auth().verifyPhoneNumber(phone);
+      const phone_auth = await firebase.auth().verifyPhoneNumber(phone);
 
-      const verificationId = phoneAuth.verificationId;
+      const verification_id = phone_auth.verificationId;
 
       alert("Verification code sent");
-      setConfirmation(verificationId);
-
-      const analytics = getAnalytics();
-
-      // Log successful verification attempt
-      logEvent(analytics, "phone_verification_success", {
-        phoneAuth: phoneAuth,
-        phone: phone,
-      });
+      setConfirmation(verification_id);
     } catch (error) {
       // Log failed verification attempt
       console.log(error);

@@ -13,9 +13,9 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<EditorParams>>();
 
-  const {userEmail, userPassword, fullPhone} = route.params;
-  const [isEmailVerified, setEmailVerified] = useState(false);
-  const [shouldContinueLoop, setShouldContinueLoop] = useState(true);
+  const {user_email, user_password, full_phone} = route.params;
+  const [is_email_verified, setEmailVerified] = useState(false);
+  const [should_continue_loop, setShouldContinueLoop] = useState(true);
 
   // function that checks if email is verified
   const checkEmailVerification = async () => {
@@ -25,11 +25,11 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
       await auth().currentUser?.reload();
 
       // assigns the current boolean value of emailVerified to isVerified.
-      const isVerified = auth().currentUser?.emailVerified || false;
+      const is_verified = auth().currentUser?.emailVerified || false;
 
-      setEmailVerified(isVerified);
+      setEmailVerified(is_verified);
       // Stops checking email verification if it's already verified.
-      if (isVerified) {
+      if (is_verified) {
         setShouldContinueLoop(false);
       }
     } catch (error) {
@@ -41,21 +41,21 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
   // The loop should continue based on the state of shouldContinueLoop/isVerified.
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (shouldContinueLoop) {
+      if (should_continue_loop) {
         checkEmailVerification();
       }
     }, 2000);
 
     // Cleanup function to clear the interval when shouldContinueLoop is false.
     return () => clearInterval(intervalId);
-  }, [shouldContinueLoop]);
+  }, [should_continue_loop]);
 
   // Use effect for navigating to PhoneNumberVerification when email is verified
   useEffect(() => {
-    if (isEmailVerified) {
+    if (is_email_verified) {
       try {
         // Navigates to PhoneNumberVerification with the user's email and phone.
-        navigation.navigate("PhoneNumberVerification", {email: userEmail, phone: fullPhone, password: userPassword});
+        navigation.navigate("PhoneNumberVerification", {email: user_email, password: user_password, phone: full_phone});
       } catch (error) {
         console.error("Error navigating to PhoneNumberVerification:", error);
         alert(`An error occurred while navigating. ${error}`);
@@ -63,7 +63,7 @@ export default function AwaitEmailVerification({route}: awaitEmailVerificationPr
         setLoading(false);
       }
     }
-  }, [isEmailVerified, userEmail, fullPhone, navigation]);
+  }, [is_email_verified, user_email, full_phone, navigation]);
 
   return (
     <View style={styles.container}>
